@@ -1,9 +1,9 @@
 name: Build doma_launcher
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-  workflow_dispatch:
 
 jobs:
   build:
@@ -23,23 +23,11 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
-      - name: Build portable EXE
+      - name: Build EXE
         run: pyinstaller --noconfirm --clean --onefile --windowed --name doma_launcher app.py
 
-      - name: Build installer
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.5
-        with:
-          path: installer/doma_launcher.iss
-          options: /O+ /DMyAppVersion=1.0.0
-
-      - name: Upload portable EXE
+      - name: Upload EXE
         uses: actions/upload-artifact@v4
         with:
           name: doma_launcher-portable
           path: dist/doma_launcher.exe
-
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
-        with:
-          name: doma_launcher-installer
-          path: installer/Output/doma_launcher_setup.exe
