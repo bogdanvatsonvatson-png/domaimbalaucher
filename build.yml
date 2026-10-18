@@ -1,0 +1,41 @@
+name: Build doma_launcher Windows app and installer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Build single-file EXE
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name doma_launcher app.py
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
+      - name: Build Windows installer
+        shell: cmd
+        run: |
+          iscc installer\doma_launcher.iss
+      - name: Upload Windows installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: doma_launcher-installer
+          path: installer/Output/doma_launcher_setup.exe
+          if-no-files-found: error
+      - name: Upload standalone EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: doma_launcher-portable
+          path: dist/doma_launcher.exe
+          if-no-files-found: error
